@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+    <meta charset="utf-8">
+
+    <head>
+    
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    
+        <style>
+            html {
+                margin: 0px;
+                padding: 0px;
+            }
+            
+            body {
+                font-family: 'Roboto', sans-serif;
+                margin: 0px;
+                padding: 0px;
+            }
+        
+            .axis {
+                font-size: 10px;
+            }
+
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #000;
+                shape-rendering: crispEdges;
+            }
+            
+            #title {
+                color: #EFEFEF;
+                background-color: #BE1818;
+                font-size: 48px;
+                font-weight: bold;
+                padding: 6px;
+                margin-left: 0px;
+                margin-right: 0px;
+                margin-top: 0px;
+            }
+            
+            #leftside {
+                float: left;
+                width: 400px;
+                height: 400px;
+                margin-top: 10px;
+                margin-left: 6px;
+                padding: 20px;
+            }
+            
+            #graph {
+                margin-top: 40px;
+                margin-left: 416px;
+                margin-right: 0px;
+            }
+            
+            .checkbox {
+                transform: scale(1.2);
+                -webkit-transform: scale(1.2);
+            }
+            
+            .checkbox-label {
+                vertical-align: top;
+            }
+            
+            .option-field {
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+            
+        </style>
+    </head>
+    <body>
+        <header id="title">MovieLens Visualization Project</header>
+        <aside id="leftside">
+            <div class="option-field">
+                <div style="display: inline-block; vertical-align: top;">Graph type: </div>
+                <div style="display: inline-block; vertical-align: top;">
+                    <input id="data-analysis-checkbox" class="checkbox" type="radio" name="graph-type" />
+                    <label for="data-analysis-checkbox" class="checkbox-label">Data Analysis</label>
+                    <input id="temporal-analysis-checkbox" class="checkbox" type="radio" name="graph-type" />
+                    <label for="temporal-analysis-checkbox" class="checkbox-label">Temporal Analisys</label>
+                </div>
+            </div>
+            <div class="option-field">
+                <label for="year">Year: </label>
+                <select id="year">
+                    <option value="1234">1995</option>
+                    <option value="1235">1996</option>
+                    <option value="1236">1997</option>
+                    <option value="1237">1998</option>
+                    <option value="1238">1999</option>
+                    <option value="1239">2000</option>
+                    <option value="1239">2001</option>
+                    <option value="1239">2002</option>
+                    <option value="1239">2003</option>
+                    <option value="1239">2004</option>
+                    <option value="1239">2005</option>
+                    <option value="1239">2006</option>
+                    <option value="1239">2007</option>
+                    <option value="1239">2008</option>
+                </select>
+            </div>
+            <div class="option-field">
+                <label for="user">User: </label>
+                <select id="user">
+                    <option value="1234">User_1234</option>
+                    <option value="1235">User_1235</option>
+                    <option value="1236">User_1236</option>
+                    <option value="1237">User_1237</option>
+                    <option value="1238">User_1238</option>
+                    <option value="1239">User_1239</option>
+                </select>
+            </div>
+            <div class="option-field">
+                <label for="genre">Genre: </label>
+                <select id="genre">
+                    <option value="action">Action</option>
+                    <option value="adventure">Adventure</option>
+                    <option value="animation">Animation</option>
+                    <option value="childrens">Children's</option>
+                    <option value="comedy">Comedy</option>
+                    <option value="crime">Crime</option>
+                    <option value="documentary">Documentary</option>
+                    <option value="drama">Drama</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="film-Noir">Film-Noir</option>
+                    <option value="horror">Horror</option>
+                    <option value="musical">Musical</option>
+                    <option value="mystery">Mystery</option>
+                    <option value="romance">Romance</option>
+                    <option value="scifi">Sci-Fi</option>
+                    <option value="thriller">Thriller</option>
+                    <option value="war">War</option>
+                    <option value="western">Western</option>
+                </select>
+            </div>
+        </aside>
+        
+        <div id="graph"></div>
+        
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script>
+            var margin = {top: 20, right: 20, bottom: 70, left: 40},
+                width = 800 - margin.left - margin.right,
+                height = 450 - margin.top - margin.bottom;
+
+            // Parse the date / time
+            var parseDate = d3.time.format("%Y").parse;
+
+            var x = d3.scale.ordinal().rangeRoundBands([0, width], 1);
+
+            var y = d3.scale.linear().range([height, 0]);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom")
+                .tickFormat(d3.time.format("%Y"));
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10);
+
+            var svg = d3.select("#graph").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", 
+                      "translate(" + margin.left + "," + margin.top + ")");
+
+            d3.csv("bar-data.csv", function(error, data) {
+
+                data.forEach(function(d) {
+                    d.date = parseDate(d.date);
+                    d.value = +d.value;
+                });
+             
+              x.domain(data.map(function(d) { return d.date; }));
+              //y.domain([0, d3.max(data, function(d) { return d.value; })]);
+              y.domain([0, 10]);
+              svg.append("g")
+                  .attr("class", "x axis")
+                  .attr("transform", "translate(0," + height + ")")
+                  .call(xAxis)
+                .selectAll("text")
+                  .style("text-anchor", "end")
+                  .attr("dx", "-.8em")
+                  //.attr("dy", "-.55em")
+                  .attr("transform", "rotate(-45)" );
+
+              svg.append("g")
+                  .attr("class", "y axis")
+                  .call(yAxis)
+                .append("text")
+                  .attr("transform", "rotate(-90)")
+                  .attr("y", 6)
+                  .attr("dy", ".71em");
+
+                var line = d3.svg.line()
+                  .x(function(d){return x(d.date);})
+                  .y(function(d){return y(d.value);})
+                  .interpolate("linear");  
+
+              svg.append("path")
+                  .attr("d", function(d) { return line(data)})
+                  .attr("transform", "translate(0,0)")
+                  .style("stroke-width", 2)
+                      .style("stroke", "#983131")
+                      .style("fill", "none");
+                      
+                svg.selectAll("bar")
+                  .data(data)
+                  .enter().append("svg:circle")  // create a new circle for each value
+                      .attr("cy", function (d) { return y(d.value); } ) // translate y value to a pixel
+                      .attr("cx", function (d,i) { return x(d.date); } ) // translate x value
+                      .attr("r", 6) // radius of circle
+                      .style("opacity", 1)
+                      .style("fill", "#BE1818"); 
+                      
+              /*svg.selectAll("bar")
+                  .data(data)
+                .enter().append("rect")
+                  .style("fill", "steelblue")
+                  .attr("x", function(d) { return x(d.date); })
+                  .attr("width", x.rangeBand())
+                  .attr("y", function(d) { return y(d.value); })
+                  .attr("height", function(d) { return height - y(d.value); });
+              */
+            });
+        </script>
+    </body>
+</html>
